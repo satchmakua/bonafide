@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bedrock"
+description = "A calibrated, provenance-first framework for detecting AI-generated media."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Satchel Hamilton" }]
+keywords = ["ai-detection", "deepfake", "c2pa", "provenance", "content-authenticity"]
+dynamic = ["version"]
+
+# --- Core deps: pure-Python, fast to install. Everything heavy (ML models,
+#     provenance, calibration) is an optional extra so the core engine + API stay lean.
+#     Versions verified against PyPI 2026-07-08. ---
+dependencies = [
+  "pydantic>=2.11,<3",
+  "typer>=0.15,<1",
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.34,<1",
+  "python-multipart>=0.0.18",
+]
+
+[project.optional-dependencies]
+# M1 — C2PA / Content Credentials provenance verification (Rust-backed reference impl).
+provenance = ["c2pa-python>=0.36"]
+# M2 — calibration + conformal abstention.
+calibrate = ["numpy>=2.1", "scikit-learn>=1.5", "mapie>=0.9"]
+# M2 — zero-shot text detector ensemble + SynthID-Text (needs transformers>=4.46).
+text = ["torch>=2.2", "transformers>=4.46", "numpy>=2.1"]
+# M3 — image forensic detectors.
+image = ["torch>=2.2", "pillow>=10.4", "numpy>=2.1"]
+# M4 — Claude-rendered evidence reports (narrator only, never a detector).
+explain = ["anthropic>=0.40"]
+dev = ["pytest>=8.3", "httpx>=0.27", "ruff>=0.7", "mypy>=1.11"]
+all = ["bedrock[provenance,calibrate,text,image,explain]"]
+
+[project.scripts]
+bedrock = "bedrock.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/satchel/bedrock"
+
+[tool.hatch.version]
+path = "src/bedrock/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bedrock"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "tests"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

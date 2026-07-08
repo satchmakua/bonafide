@@ -1,0 +1,52 @@
+# --- Base ignores (stack-agnostic) ---
+
+# Secrets / local env — never commit real ones (see .env.example)
+.env
+.env.*
+!.env.example
+*.local
+
+
+# Editor / OS cruft
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# Generic build / cache output
+dist/
+build/
+out/
+coverage/
+.cache/
+tmp/
+*.tmp
+
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+
+# Model weights / large media fixtures (never commit — they belong in object storage)
+*.safetensors
+*.onnx
+*.pt
+*.bin
+models/
+data/samples/**/*.jpg
+data/samples/**/*.png
+data/samples/**/*.mp4
+data/samples/**/*.wav
