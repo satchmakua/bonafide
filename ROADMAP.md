@@ -1,7 +1,6 @@
 # ROADMAP — Bedrock
 
-The milestone checklist. Standing instruction: **"continue"** → build the next unchecked
-milestone.
+The milestone checklist.
 
 **Rules of the road:**
 - Each milestone is an **independently runnable** slice — something actually testable end-to-end.
