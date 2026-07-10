@@ -19,6 +19,10 @@ app = FastAPI(
     description="Calibrated, provenance-first detection of AI-generated media.",
 )
 
+# Uvicorn/Starlette impose no body-size limit; an unbounded read() of an attacker-sized
+# upload exhausts memory. Generous for any single image or text asset.
+MAX_UPLOAD_BYTES = 64 * 2**20
+
 
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
@@ -48,7 +52,12 @@ async def detect_endpoint(
 ) -> Verdict:
     """Analyze either a ``text`` field or an uploaded ``file`` and return a Verdict."""
     if file is not None:
-        data = await file.read()
+        data = await file.read(MAX_UPLOAD_BYTES + 1)
+        if len(data) > MAX_UPLOAD_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File exceeds the {MAX_UPLOAD_BYTES // 2**20} MiB upload limit.",
+            )
         return detect_bytes(data, path=file.filename, prior_ai=prior, alpha=alpha)
     if text is not None:
         return detect_text(text, prior_ai=prior, alpha=alpha)

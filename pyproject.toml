@@ -34,7 +34,9 @@ text = ["torch>=2.2", "transformers>=4.46", "numpy>=2.1"]
 image = ["torch>=2.2", "pillow>=10.4", "numpy>=2.1"]
 # M4 — Claude-rendered evidence reports (narrator only, never a detector).
 explain = ["anthropic>=0.40"]
-dev = ["pytest>=8.3", "httpx>=0.27", "ruff>=0.7", "mypy>=1.11"]
+# `cryptography` builds throwaway cert chains so tests can exercise trusted-vs-untrusted
+# signers (the C2PA ingredient-laundering defense) without touching a real trust list.
+dev = ["pytest>=8.3", "httpx>=0.27", "ruff>=0.7", "mypy>=1.11", "cryptography>=43"]
 all = ["bedrock[provenance,calibrate,text,image,explain]"]
 
 [project.scripts]
@@ -62,6 +64,10 @@ python_version = "3.11"
 strict = true
 files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = "c2pa"
+ignore_missing_imports = true  # ships no py.typed marker; treat as Any at the boundary
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -24,13 +24,16 @@ The milestone checklist.
 
 ## Phase 1 — Real signals, one tier at a time
 
-- [ ] **M1 — Provenance-first images (C2PA).** Add the `c2pa-python` adapter behind the `Signal`
-  port: validate a Content Credentials manifest + the CAI trust list, map a valid AI-generator
-  claim to a CONCLUSIVE `+llr` and a verified camera capture to a CONCLUSIVE `−llr`; absent/invalid
-  manifests → `applicable=False` / conflict. Image ingest is wired. A high-trust, low-risk first
-  real capability (given C2PA's ubiquity in cameras + Adobe + OpenAI/Google).
-  **Test:** run `bedrock detect signed.jpg` on a Content-Credentials image → CONCLUSIVE evidence and
-  a confident, correct verdict; on an unsigned image → `abstain` with the C2PA signal marked n/a.
+- [x] **M1 — Provenance-first images (C2PA).** Added the `c2pa-python` adapter behind the `Signal`
+  port: validates a Content Credentials manifest against bundled CAI + C2PA-conformance trust
+  lists, maps IPTC `digitalSourceType` markers (and, as a fallback, known AI generator names) to
+  CONCLUSIVE evidence. Reliability is **direction-aware and per-manifest** (ADR-0003): untrusted
+  AI claims are discounted, untrusted capture claims count zero, and a spoofed claim can't launder
+  itself through a trust-listed re-export. Absent manifests → `applicable=False`; tampered ones →
+  conflict → `abstain`. Image ingest wired (container brands checked, so WebP/HEIC/AVIF route right).
+  **Test:** `bedrock detect firefly.jpg` (a real Adobe Firefly asset) → `100% AI-generated,
+  decision: AI`, CONCLUSIVE evidence, `signer=Adobe Inc.`; an unsigned image → `abstain` with the
+  C2PA signal marked not-applicable; a self-signed "camera" spoof → `abstain` (claim weighed zero).
 
 - [ ] **M2 — Text ensemble + calibration (the thesis).** Add Binoculars + Fast-DetectGPT (zero-shot,
   over an Apache-2.0 scoring LLM) and the SynthID-Text watermark adapter; replace the M0 placeholders

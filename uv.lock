@@ -128,6 +128,7 @@ calibrate = [
     { name = "scikit-learn" },
 ]
 dev = [
+    { name = "cryptography" },
     { name = "httpx" },
     { name = "mypy" },
     { name = "pytest" },
@@ -158,6 +159,7 @@ requires-dist = [
     { name = "anthropic", marker = "extra == 'explain'", specifier = ">=0.40" },
     { name = "c2pa-python", marker = "extra == 'all'", specifier = ">=0.36" },
     { name = "c2pa-python", marker = "extra == 'provenance'", specifier = ">=0.36" },
+    { name = "cryptography", marker = "extra == 'dev'", specifier = ">=43" },
     { name = "fastapi", specifier = ">=0.115,<1" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
     { name = "mapie", marker = "extra == 'all'", specifier = ">=0.9" },

@@ -10,4 +10,5 @@ authoritative. Everything that would bloat them goes here:
   consequences.
   - [`0001-record-architecture-decisions.md`](adr/0001-record-architecture-decisions.md)
   - [`0002-evidence-fusion-in-log-odds-space.md`](adr/0002-evidence-fusion-in-log-odds-space.md)
+  - [`0003-direction-aware-provenance-trust.md`](adr/0003-direction-aware-provenance-trust.md)
 - Long-form design notes, research, API references, runbooks, diagrams, etc.

@@ -221,11 +221,12 @@ class SignalRegistry:
 Registration is declarative (entry-points/decorator), so third parties ship signals as pip packages.
 
 ### 6.2 Provenance adapter — C2PA (`c2pa-python`)
-Validates the manifest, checks signature + the CAI trust list, and inspects `c2pa.actions` / `claim_generator`. Maps to `Evidence`:
-- Valid manifest, generator is a known AI tool / `c2pa.created` by a model → CONCLUSIVE, large `+llr`.
-- Valid manifest, hardware-camera capture with intact hash bindings → CONCLUSIVE, large `−llr` (toward authentic).
+Validates the manifest, checks the signature against the bundled CAI + C2PA-conformance trust lists, and inspects `c2pa.actions` / `claim_generator` across **every** manifest in the store (AI-origin evidence often hides in an *ingredient* after an edit). Maps to `Evidence` — and because a manifest is a *signed claim*, not ground truth, reliability is **direction-aware and per-manifest** (ADR-0003):
+- Trust-listed signer, and the claim sits on the **active** manifest it vouches for → CONCLUSIVE at full reliability: a known AI generator / `trainedAlgorithmicMedia` → large `+llr`; a hardware-camera capture with intact hash bindings → large `−llr`.
+- Untrusted signer (or a claim laundered in via an untrusted ingredient) → an **AI** claim is still strong (a statement against interest, discounted to 0.85); a **capture/human** claim counts for **exactly zero** — self-signing "a camera took this" is the canonical C2PA spoof, so it is recorded in the evidence trail and weighed at nothing.
 - No manifest → `applicable=False` (contributes 0). **Never** read as "human."
-- Manifest present but signature invalid / untrusted / hash-mismatch → `detail` flags tampering; feeds `conflicts`.
+- Manifest present but signature invalid / hash-mismatch (tampering or malformation) → contributes 0 and `detail` feeds `conflicts`, forcing `abstain`.
+- Manifest valid but carrying **no** origin markers → `llr = 0`. A signed manifest is not evidence of human origin; AI-origin assertions can simply be omitted.
 
 ### 6.3 Watermark adapter — SynthID-Text
 Weighted-Mean detector (no training) + Bayesian detector (trained) over supported models → CONCLUSIVE-tier `+llr` when a watermark is found; `applicable=False` when the text is too short or the model family isn't covered. Image/audio/video SynthID detection is currently gated to Google's portal, so for those modalities Bedrock emits a **CONTEXT** signal ("SynthID check recommended — verify at Google's SynthID Detector") until a programmatic API exists. Tracked in §9.
@@ -291,7 +292,7 @@ Top-down and independently runnable — each one you can open and test.
 - **Text false positives harm real people (ethical + legal).** *The* headline risk — it's what's killing the incumbents. → Calibration + conformal abstention + an "evidence, not accusation" API contract + a configurable FPR operating point + an explicit non-native-English eval slice + no automated decisions. This risk *is* the product strategy.
 - **Detectors lose ~50% accuracy in the wild / under attack.** → OOD guards zero out unreliable signals; abstain rather than guess; lean on hard provenance where present; publish honest benchmark numbers (credibility as a moat).
 - **Distribution shift — new generators weekly.** → Versioned calibrators + a scheduled re-calibration pipeline; conformal guarantees hold under exchangeability; drift monitoring on the ledger.
-- **Provenance is strippable and partially spoofable.** → Absence ⇒ `applicable=False` (never "human"); always validate the trust list + hash bindings; surface tampered/untrusted manifests as `conflicts`, never as silent truth.
+- **Provenance is strippable and partially spoofable.** → Absence ⇒ `applicable=False` (never "human"); always validate the trust list + hash bindings; surface *tampered* manifests as `conflicts`, and give *untrusted* claims direction-aware weight (untrusted capture claims count zero — ADR-0003) — never silent truth. Trust is judged per-manifest, so a spoofed claim cannot launder itself into credibility by riding as an ingredient inside a trust-listed re-export.
 - **Third-party API licensing & cost.** Hive/Sensity are enterprise-only. → Opt-in adapters only; the OSS core is fully functional without any of them.
 - **SynthID detection for image/audio/video is gated to Google.** → Text via the OSS detector now; other modalities emit a CONTEXT "verify at SynthID Detector" signal until a programmatic API appears. Track Google's rollout.
 - **Scoring-LLM license (Llama MAU clause).** → Default to Apache-2.0 observer models (Falcon/Qwen); document the choice; verify each detector repo's own license at integration.

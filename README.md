@@ -12,8 +12,10 @@ Bedrock takes a different bet. It treats detection as **evidence aggregation und
 
 See [DESIGN.md](DESIGN.md) for the full technical design.
 
-**Status:** M0 scaffold — the engine spine runs end-to-end (CLI + API + fusion core) with a
-placeholder detector. See [ROADMAP.md](ROADMAP.md) for the plan.
+**Status:** M1 — the engine runs end-to-end (CLI + API + fusion core) with a real, trust-verified
+**C2PA / Content Credentials** signal for images. Text detection is still a placeholder heuristic
+(the real ensemble lands in M2), so most text correctly returns `abstain`. See
+[ROADMAP.md](ROADMAP.md) for the plan.
 
 ---
 
@@ -22,19 +24,34 @@ placeholder detector. See [ROADMAP.md](ROADMAP.md) for the plan.
 **Prerequisites:** Python ≥ 3.11 and [`uv`](https://docs.astral.sh/uv/) (check: `python --version`, `uv --version`).
 
 ```bash
-uv venv                          # create .venv
-uv pip install -e ".[dev]"       # install (core is pure-Python; ML/provenance are extras)
+uv venv                                     # create .venv
+uv pip install -e ".[dev,provenance]"       # install (core is pure-Python; ML is an extra)
 
-# CLI — analyze text or a file
+# CLI — analyze an image's Content Credentials, or some text
+uv run bedrock detect ./photo.jpg
 uv run bedrock detect --text "The quick brown fox jumps over the lazy dog near the bridge."
-uv run bedrock detect ./some-file.txt --json
+uv run bedrock detect ./photo.jpg --json
 
 # API — starts on http://localhost:8000 (interactive docs at /docs)
 uv run uvicorn bedrock.service.app:app --reload
 ```
 
-Today every verdict is honest-but-shallow: only a placeholder text heuristic is wired, so most
-inputs correctly return **abstain**. Real signals (C2PA, then the text ensemble) arrive in M1–M2.
+A C2PA-signed image gives a real, explained verdict:
+
+```
+Bedrock verdict: 100% AI-generated (CI 99-100%)  |  decision: AI
+modality: image  |  engine: bedrock/0.0.1+fuse-logodds-v0  |  coverage: 95%
+
+Evidence:
+  [+] c2pa.manifest        conclusive llr +6.00  x0.95  -> +5.70   (basis=digitalSourceType:
+      trainedAlgorithmicMedia, validation_state=Trusted, signer=Adobe Inc., ...)
+
+Conflicts: none
+```
+
+Everything else still answers honestly: an unsigned image, a self-signed "a camera took this"
+spoof, and ordinary text all return **abstain**, because Bedrock refuses to guess. The text
+ensemble and real calibration arrive in M2.
 
 ### Commands
 

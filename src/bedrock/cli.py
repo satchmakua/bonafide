@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import typer
@@ -35,7 +36,9 @@ def detect(
         verdict = detect_file(source, prior_ai=prior, alpha=alpha)
 
     if as_json:
-        typer.echo(verdict.model_dump_json(indent=2))
+        # ensure_ascii (the json default) keeps redirected stdout safe on Windows cp1252,
+        # where pydantic's model_dump_json would emit raw non-ASCII and raise.
+        typer.echo(json.dumps(verdict.model_dump(mode="json"), indent=2))
     else:
         typer.echo(format_verdict(verdict))
 

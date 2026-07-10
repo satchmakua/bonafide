@@ -1,8 +1,9 @@
 """Ingest + modality routing: turn raw input (text, bytes, or a file) into an InputContext.
 
-M0 sniffs modality by extension then by magic bytes. Only TEXT has a working signal today, so
-non-text inputs correctly route to zero applicable signals → abstain (which is the honest M0
-answer and proves the router).
+Modality is sniffed by extension first, then by magic bytes. Container formats need their
+*brand* checked, not just the leading magic: RIFF is both WebP and WAV, and `ftyp` is both
+HEIC/AVIF and MP4 — get this wrong and a signed image silently routes to a modality with no
+signals, which reads as a bland "abstain" rather than the bug it is.
 """
 
 from __future__ import annotations
@@ -20,6 +21,25 @@ _TEXT_EXT = {".txt", ".md", ".markdown", ".rst", ".csv", ".json", ".html"}
 
 _PNG_SIG = b"\x89PNG\r\n\x1a\n"
 _JPEG_SIG = b"\xff\xd8\xff"
+# ISO-BMFF brands (bytes 8..12, after the `ftyp` box type) that denote a still image.
+_IMAGE_FTYP_BRANDS = {b"heic", b"heix", b"heif", b"mif1", b"msf1", b"avif", b"avis"}
+
+
+def sniff_mime(data: bytes) -> str | None:
+    """The MIME type of an image byte string, or None if it isn't a format we recognize."""
+    if data.startswith(_PNG_SIG):
+        return "image/png"
+    if data.startswith(_JPEG_SIG):
+        return "image/jpeg"
+    if data.startswith(b"RIFF") and data[8:12] == b"WEBP":
+        return "image/webp"
+    if data[4:8] == b"ftyp":
+        brand = data[8:12]
+        if brand in {b"avif", b"avis"}:
+            return "image/avif"
+        if brand in _IMAGE_FTYP_BRANDS:
+            return "image/heic"
+    return None
 
 
 def sniff_modality(*, path: str | None, data: bytes | None) -> Modality:
@@ -37,10 +57,12 @@ def sniff_modality(*, path: str | None, data: bytes | None) -> Modality:
     if data is not None:
         if data.startswith(_PNG_SIG) or data.startswith(_JPEG_SIG):
             return Modality.IMAGE
-        if data[:3] == b"ID3" or data.startswith(b"RIFF"):
+        if data[:3] == b"ID3":
             return Modality.AUDIO
-        if data[4:8] == b"ftyp":
-            return Modality.VIDEO
+        if data.startswith(b"RIFF"):  # WEBP vs WAVE/AVI
+            return Modality.IMAGE if data[8:12] == b"WEBP" else Modality.AUDIO
+        if data[4:8] == b"ftyp":  # HEIC/AVIF vs MP4/MOV
+            return Modality.IMAGE if data[8:12] in _IMAGE_FTYP_BRANDS else Modality.VIDEO
     return Modality.TEXT
 
 
@@ -53,6 +75,8 @@ def context_from_bytes(
 ) -> InputContext:
     modality = sniff_modality(path=path, data=data)
     text = data.decode("utf-8", errors="replace") if modality is Modality.TEXT else None
+    if mime is None:
+        mime = sniff_mime(data)
     return InputContext(modality=modality, text=text, data=data, path=path, mime=mime)
 
 

@@ -18,16 +18,19 @@ FUSION_VERSION = "logodds-v0"
 
 def detect_conflicts(applicable: Sequence[Evidence]) -> list[str]:
     """Flag opposite-sign CONCLUSIVE signals — e.g. C2PA 'camera capture' vs. a verified
-    AI watermark. High-trust signals must never be silently averaged against each other."""
+    AI watermark — plus any conflict a signal declared itself (a ``detail["conflict"]``
+    string, e.g. a tampered provenance chain). High-trust signals must never be silently
+    averaged against each other, and a conflict always forces ``abstain``."""
+    conflicts = [str(e.detail["conflict"]) for e in applicable if e.detail.get("conflict")]
     conclusive = [e for e in applicable if e.tier is SignalTier.CONCLUSIVE and e.reliability > 0.0]
     pos = [e.signal_id for e in conclusive if e.llr > 0.0]
     neg = [e.signal_id for e in conclusive if e.llr < 0.0]
     if pos and neg:
-        return [
+        conflicts.append(
             f"Conclusive signals disagree: {', '.join(pos)} indicate AI; "
             f"{', '.join(neg)} indicate human/authentic."
-        ]
-    return []
+        )
+    return conflicts
 
 
 def fuse(

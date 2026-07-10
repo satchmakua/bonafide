@@ -67,6 +67,24 @@ def test_conflicting_conclusive_signals_force_abstain() -> None:
     assert v.conflicts and "disagree" in v.conflicts[0]
 
 
+def test_signal_declared_conflict_forces_abstain() -> None:
+    # A signal can surface its own conflict (e.g. a tampered provenance chain) via
+    # detail["conflict"]; the engine must abstain and report it, even with strong evidence.
+    tampered = Evidence(
+        signal_id="c2pa",
+        applicable=True,
+        llr=0.0,
+        reliability=0.0,
+        tier=SignalTier.CONCLUSIVE,
+        detail={"conflict": "manifest INVALID - tampering"},
+        model_version="test/0",
+    )
+    ev = [_ev(5.0, 1.0, signal_id="other"), tampered]
+    v = fuse(ev, modality=Modality.IMAGE, engine_version="t", gate=OPEN_GATE)
+    assert v.decision == "abstain"
+    assert any("tampering" in c for c in v.conflicts)
+
+
 def test_every_signal_is_reported_in_the_verdict() -> None:
     ev = [_ev(2.0, 1.0, signal_id="a"), _ev(0.0, 0.0, applicable=False, signal_id="b")]
     v = fuse(ev, modality=Modality.TEXT, engine_version="t")

@@ -22,9 +22,16 @@ def engine_version() -> str:
 
 
 def default_registry() -> SignalRegistry:
-    """The signals wired up by default. Grows one adapter per milestone."""
+    """The signals wired up by default. Grows one adapter per milestone; signals whose
+    optional extra isn't installed are simply not offered (never an import error)."""
     registry = SignalRegistry()
     registry.register(LexicalHeuristicSignal())
+    try:
+        from .signals.provenance import C2paSignal  # requires the [provenance] extra
+    except ImportError:
+        pass
+    else:
+        registry.register(C2paSignal())
     return registry
 
 
