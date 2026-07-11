@@ -26,7 +26,7 @@ MAX_UPLOAD_BYTES = 64 * 2**20
 
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
-    return {"status": "ok", "engine": engine_version()}
+    return {"status": "ok", "engine": engine_version()}  # uncalibrated default
 
 
 @app.get("/signals")

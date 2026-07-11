@@ -16,6 +16,18 @@ from .types import Evidence, Modality, SignalTier, Verdict
 FUSION_VERSION = "logodds-v0"
 
 
+def raw_log_odds(evidence: Sequence[Evidence], *, prior_ai: float = 0.5) -> float | None:
+    """The fused log-odds before calibration, or ``None`` when no signal applied.
+
+    This is the raw score the calibrator and conformal gate are fit against (training/eval),
+    kept separate from ``fuse`` so fitting never depends on a calibrator.
+    """
+    applicable = [e for e in evidence if e.applicable]
+    if not applicable:
+        return None
+    return logit(prior_ai) + sum(e.contribution for e in applicable)
+
+
 def detect_conflicts(applicable: Sequence[Evidence]) -> list[str]:
     """Flag opposite-sign CONCLUSIVE signals — e.g. C2PA 'camera capture' vs. a verified
     AI watermark — plus any conflict a signal declared itself (a ``detail["conflict"]``
@@ -50,7 +62,9 @@ def fuse(
     """
     active_calibrator: Calibrator = calibrator or IdentityCalibrator()
     active_gate: ConformalGate = gate or DeadbandGate()
-    coverage = 1.0 - alpha
+    # Coverage is what the GATE delivers, never the runtime alpha — a fitted conformal gate
+    # enforces the alpha it was fit at, so sourcing this from alpha would overstate the guarantee.
+    coverage = active_gate.coverage(alpha)
     ev = tuple(evidence)
     applicable = [e for e in ev if e.applicable]
     conflicts = detect_conflicts(applicable)

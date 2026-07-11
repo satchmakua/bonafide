@@ -35,14 +35,23 @@ The milestone checklist.
   decision: AI`, CONCLUSIVE evidence, `signer=Adobe Inc.`; an unsigned image → `abstain` with the
   C2PA signal marked not-applicable; a self-signed "camera" spoof → `abstain` (claim weighed zero).
 
-- [ ] **M2 — Text ensemble + calibration (the thesis).** Add Binoculars + Fast-DetectGPT (zero-shot,
-  over an Apache-2.0 scoring LLM) and the SynthID-Text watermark adapter; replace the M0 placeholders
-  with a fitted isotonic/temperature **calibrator** and a **split-conformal** abstention gate; build
-  the **evaluation harness** (RAID benchmark) reporting ECE, FPR (incl. a non-native-English slice),
-  and conformal coverage. Retire `lexical.py`.
+- [x] **M2a — Calibration + conformal abstention + eval harness (the thesis core).** Replaced the
+  M0 placeholders with real, fitted calibration (`PlattCalibrator`, `IsotonicCalibrator` via PAVA)
+  and a **split-conformal** abstention gate with a class-conditional coverage guarantee — all pure
+  stdlib, so the calibration core stays zero-dependency. Added the **evaluation harness** (ECE,
+  Brier, AUROC, FPR with a subgroup slice, empirical coverage) and `bedrock fit` / `bedrock eval`
+  CLI commands. Calibration ships as a versioned, fingerprinted `CalibrationArtifact` threaded
+  through detection; the default stays honestly uncalibrated until an artifact is fit on real data.
+  **Test:** `bedrock fit corpus.jsonl -o cal.json` then `bedrock eval corpus.jsonl -c cal.json` →
+  reports ECE / FPR / coverage; on synthetic scores, isotonic cuts ECE 0.069 → 0.008 and empirical
+  conformal coverage tracks the 1-α target (both pinned by tests).
+
+- [ ] **M2b — Neural text detector ensemble.** Add Binoculars + Fast-DetectGPT (zero-shot, over an
+  Apache-2.0 scoring LLM behind the `[text]` extra) and the SynthID-Text watermark adapter; fit the
+  M2a calibrator + conformal gate on the RAID benchmark (incl. a non-native-English slice) and ship
+  the trained artifact as the default. Retire the `lexical.py` placeholder.
   **Test:** `bedrock detect essay.txt` → a calibrated `p_ai` with a CI and honest `abstain` on
-  borderline text; `uv run python -m bedrock.eval` (or the documented command) prints ECE < 0.05 and
-  the target FPR on the benchmark.
+  borderline text; `bedrock eval raid.jsonl -c shipped.json` prints ECE < 0.05 and the target FPR.
 
 - [ ] **M3 — Image ML ensemble + multi-signal fusion.** Add open image-forensics detector(s) so an
   image fuses provenance + watermark + ML; turn on conflict surfacing (C2PA "camera" vs. pixel tells).

@@ -10,6 +10,7 @@ Public API:
 from __future__ import annotations
 
 from ._version import __version__
+from .calibration import CalibrationArtifact, default_artifact
 from .engine import (
     default_registry,
     detect,
@@ -18,11 +19,12 @@ from .engine import (
     detect_text,
     engine_version,
 )
-from .fusion import fuse
+from .fusion import fuse, raw_log_odds
 from .report import format_verdict
 from .types import Decision, Evidence, InputContext, Modality, SignalTier, Verdict
 
 __all__ = [
+    "CalibrationArtifact",
     "Decision",
     "Evidence",
     "InputContext",
@@ -30,6 +32,7 @@ __all__ = [
     "SignalTier",
     "Verdict",
     "__version__",
+    "default_artifact",
     "default_registry",
     "detect",
     "detect_bytes",
@@ -38,4 +41,5 @@ __all__ = [
     "engine_version",
     "format_verdict",
     "fuse",
+    "raw_log_odds",
 ]

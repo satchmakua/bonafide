@@ -12,10 +12,10 @@ Bedrock takes a different bet. It treats detection as **evidence aggregation und
 
 See [DESIGN.md](DESIGN.md) for the full technical design.
 
-**Status:** M1 — the engine runs end-to-end (CLI + API + fusion core) with a real, trust-verified
-**C2PA / Content Credentials** signal for images. Text detection is still a placeholder heuristic
-(the real ensemble lands in M2), so most text correctly returns `abstain`. See
-[ROADMAP.md](ROADMAP.md) for the plan.
+**Status:** M2a — a real, trust-verified **C2PA / Content Credentials** signal for images (M1),
+plus a real **calibration + conformal-abstention** core with an evaluation harness and
+`bedrock fit` / `bedrock eval` (M2a). The neural text ensemble lands in M2b, so text still uses a
+placeholder heuristic and mostly returns `abstain`. See [ROADMAP.md](ROADMAP.md) for the plan.
 
 ---
 
@@ -58,6 +58,9 @@ ensemble and real calibration arrive in M2.
 | Command | What it does |
 |---|---|
 | `uv run bedrock detect <src>` | Run a detection and print the evidence report |
+| `uv run bedrock fit <corpus.jsonl> -o cal.json` | Fit a calibration + abstention artifact from labeled data |
+| `uv run bedrock eval <corpus.jsonl> -c cal.json` | Evaluate calibration + decisions (ECE, FPR, coverage) |
+| `uv run bedrock detect <src> -c cal.json` | Detect using a fitted calibration artifact |
 | `uv run uvicorn bedrock.service.app:app --reload` | Run the HTTP API |
 | `uv run pytest` | Run the tests |
 | `uv run ruff check . && uv run mypy src tests` | Lint + typecheck |

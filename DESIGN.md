@@ -69,7 +69,7 @@ You should be able to picture it: `bedrock detect photo.jpg` → a card that say
 | Text detectors | **Binoculars + Fast-DetectGPT** (zero-shot) | No training data required to launch; Binoculars is known for very low FPR at a fixed threshold; both open-source and evaluated on the RAID robustness benchmark. |
 | Scoring LLM | **Falcon-7B or Qwen2.5-7B (Apache-2.0), PyTorch** | Zero-shot detectors need an observer LLM; Apache-2.0 keeps the open core license-clean (avoids Llama's MAU clause). Runs on one mid GPU; CPU fallback for small inputs. |
 | Image detectors | **Open HF image-forensics model(s)** + opt-in **Reality Defender / Hive** adapters | Seed with open detectors so the core stands alone; third-party APIs are adapters (RD has a free dev tier). |
-| Calibration | **scikit-learn (isotonic / Platt) + conformal via `MAPIE` or `crepes`** | Post-hoc calibration + distribution-free abstention with coverage guarantees. Battle-tested, not hand-rolled. |
+| Calibration | **pure-Python: Platt (Newton) + isotonic (PAVA) + split-conformal** | Hand-verifiable and dependency-free, so the calibration core imports into `fusion` with zero heavy deps. Chosen over sklearn/MAPIE — ADR-0004. |
 | Fusion meta-model | **Logistic regression / gradient-boosted stacker (scikit-learn)** | Interpretable stacked ensemble over signal features — the proven pattern (MOSAIC, authio's 12-model meta-classifier). Interpretability *is* a feature here. |
 | Service API | **FastAPI + Pydantic v2 + Uvicorn** | Async, typed, OpenAPI for free; same language as the core, so the SDK and service share models. |
 | Async media jobs | **Redis + Arq** | Image/video inference is slow and GPU-bound; a queue keeps `/detect` responsive and is the seam video needs later. |
@@ -246,7 +246,9 @@ Implements §4 exactly. Pure, deterministic, unit-tested against hand-computed l
 ### 6.8 Calibration & evaluation harness *(this is an ML product — evaluation is a first-class subsystem)*
 - **Benchmarks:** RAID (text robustness, incl. adversarial/paraphrase splits) + a curated image set spanning generators (Midjourney/Imagen/SD/Flux) and real photography.
 - **Metrics:** ECE (calibration), FPR at the chosen operating point (esp. a *non-native-English* slice — the harm we refuse to cause), abstention rate, and conformal coverage vs. target.
-- **Artifacts:** versioned calibrators + priors, checked in and referenced by hash in every `Verdict`. Re-calibration is a scheduled pipeline as new generators appear.
+- **Artifacts:** a fitted `CalibrationArtifact` (calibrator + conformal gate + fit-time prior), content-fingerprinted and stamped into every `Verdict`. The prior is locked at inference so a caller can't silently re-scale a calibrated model.
+- **Coverage is the gate's, not a knob:** a `Verdict`'s reported coverage comes from the conformal gate that actually decided (`1-α_fit`), never from a runtime `α` — reporting the latter would *overstate* the guarantee, the precise dishonesty this project rejects.
+- **Train/test discipline:** the coverage guarantee and calibration assume the calibration set is exchangeable with, and not reused as, the evaluation/production data. Held-out evaluation is the honest path (ADR-0004).
 
 ### 6.9 Verdict ledger & reproducibility
 Every verdict persists to Postgres with the input hash, the full `evidence[]`, and the exact versions of every signal + calibrator. Any verdict can be **replayed** and explained months later — essential for audits, disputes, and the EU AI Act paper trail.

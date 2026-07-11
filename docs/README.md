@@ -11,4 +11,5 @@ authoritative. Everything that would bloat them goes here:
   - [`0001-record-architecture-decisions.md`](adr/0001-record-architecture-decisions.md)
   - [`0002-evidence-fusion-in-log-odds-space.md`](adr/0002-evidence-fusion-in-log-odds-space.md)
   - [`0003-direction-aware-provenance-trust.md`](adr/0003-direction-aware-provenance-trust.md)
+  - [`0004-calibration-and-conformal-abstention.md`](adr/0004-calibration-and-conformal-abstention.md)
 - Long-form design notes, research, API references, runbooks, diagrams, etc.

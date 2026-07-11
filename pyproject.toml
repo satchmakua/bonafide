@@ -59,6 +59,10 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
 
+[tool.ruff.lint.flake8-bugbear]
+# Typer's design puts Option()/Argument() in parameter defaults; that's the idiom, not a bug.
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true
