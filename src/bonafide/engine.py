@@ -22,7 +22,7 @@ from .types import Evidence, InputContext, Verdict
 def engine_version(artifact: CalibrationArtifact | None = None) -> str:
     """Version string stamped into every Verdict for reproducibility (incl. the calibration)."""
     cal = (artifact or default_artifact()).version
-    return f"bedrock/{__version__}+fuse-{FUSION_VERSION}+cal-{cal}"
+    return f"bonafide/{__version__}+fuse-{FUSION_VERSION}+cal-{cal}"
 
 
 def default_registry() -> SignalRegistry:

@@ -34,7 +34,7 @@ def _ascii(text: str) -> str:
 def format_verdict(verdict: Verdict) -> str:
     lo, hi = verdict.ci
     lines = [
-        f"Bedrock verdict: {verdict.p_ai * 100:.0f}% AI-generated "
+        f"Bonafide verdict: {verdict.p_ai * 100:.0f}% AI-generated "
         f"(CI {lo * 100:.0f}-{hi * 100:.0f}%)  |  decision: {verdict.decision.upper()}",
         f"modality: {verdict.modality.value}  |  engine: {verdict.engine_version}  "
         f"|  coverage: {verdict.coverage * 100:.0f}%",

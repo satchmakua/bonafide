@@ -1,4 +1,4 @@
-"""The evidence-fusion engine — Bedrock's core (DESIGN.md §4, ADR-0002).
+"""The evidence-fusion engine — Bonafide's core (DESIGN.md §4, ADR-0002).
 
 Accumulate applicable evidence in log-odds space, calibrate to a probability, gate the
 decision (with abstention), and surface conflicts. Pure and deterministic: a ``Verdict`` is a

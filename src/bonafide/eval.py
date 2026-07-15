@@ -214,7 +214,7 @@ def format_report(report: EvalReport) -> str:
         return "n/a" if math.isnan(x) else f"{x * 100:.1f}%"
 
     lines = [
-        f"Bedrock eval  |  artifact: {report.artifact_version}",
+        f"Bonafide eval  |  artifact: {report.artifact_version}",
         f"  corpus: {report.n} examples ({report.n_ai} AI, {report.n_human} human); "
         f"{report.n_scored} scored, {report.n - report.n_scored} no-signal",
         f"  calibration:  ECE {pct(report.ece)}   Brier {report.brier:.4f}   "

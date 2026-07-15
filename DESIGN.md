@@ -1,19 +1,19 @@
-# Bedrock — Design
+# Bonafide — Design
 
 > A calibrated, provenance-first framework for detecting AI-generated media — honest about what it knows, and about what it doesn't.
 
 **Status:** Design draft · **Language:** Python 3.11+ (Rust-backed provenance) · **Stack target:** Engine/SDK + service, cross-platform, GPU-optional
 
-Name: **Bedrock** — the solid ground of truth under a flood of synthetic media. The verdict object is a **`Verdict`**; the fused truth-value is its **authenticity**.
+Name: **Bonafide** *(formerly Bedrock)* — *bona fide*, "in good faith": the genuine article, verified. The verdict object is a **`Verdict`**; the fused truth-value is its **authenticity**.
 
 ---
 
 <!-- IP / LEGAL / ETHICAL — read first, it constrains the whole design -->
 > **Legal & ethical constraints (load-bearing, not footnotes).**
-> 1. **A wrong "this is AI" is a real-world harm.** Independent studies put incumbent text detectors at **5–12% false-positive rates on non-native English writers**; OpenAI *retired* its own classifier for low accuracy, and universities (e.g. Vanderbilt) have **disabled** Turnitin's detector as unsafe. Bedrock therefore never emits a bare accusation. It emits *evidence + a calibrated probability + an explicit abstain state*, and the API is shaped so it **cannot** be used as an automated "this person cheated" oracle. This is both an ethical stance and a defamation/discrimination-liability shield.
+> 1. **A wrong "this is AI" is a real-world harm.** Independent studies put incumbent text detectors at **5–12% false-positive rates on non-native English writers**; OpenAI *retired* its own classifier for low accuracy, and universities (e.g. Vanderbilt) have **disabled** Turnitin's detector as unsafe. Bonafide therefore never emits a bare accusation. It emits *evidence + a calibrated probability + an explicit abstain state*, and the API is shaped so it **cannot** be used as an automated "this person cheated" oracle. This is both an ethical stance and a defamation/discrimination-liability shield.
 > 2. **Third-party detector licensing.** Hive and Sensity are enterprise-contract-only; Reality Defender offers a free 50/mo dev tier. These are **opt-in adapters**, never hard dependencies — the open-core engine must be fully functional on open-weight models + open standards alone.
 > 3. **Scoring-model licenses.** Zero-shot text detectors need a scoring LLM. Default to **Apache-2.0 models** (Falcon, Qwen) to avoid the Llama community-license >700M-MAU clause in a distributable open core.
-> 4. **Regulatory tailwind.** **EU AI Act Article 50** transparency/labeling obligations take effect **2 Aug 2026** (fines to €15M / 3% of turnover). Bedrock is a *verification* enabler for that regime — a reason enterprises will need it, and a reason to get the provenance path exactly right.
+> 4. **Regulatory tailwind.** **EU AI Act Article 50** transparency/labeling obligations take effect **2 Aug 2026** (fines to €15M / 3% of turnover). Bonafide is a *verification* enabler for that regime — a reason enterprises will need it, and a reason to get the provenance path exactly right.
 
 *(Prior art, versions, and standards below verified via web research on **2026-07-08**.)*
 
@@ -21,29 +21,29 @@ Name: **Bedrock** — the solid ground of truth under a flood of synthetic media
 
 ## 1. Concept
 
-Bedrock answers one question for any medium — **"was this made by a human or by AI?"** — but it refuses to answer it the way everyone else does. The incumbent pattern is a single model emitting a confident binary that is wrong often enough, and in biased enough ways, that its own customers are turning it off.
+Bonafide answers one question for any medium — **"was this made by a human or by AI?"** — but it refuses to answer it the way everyone else does. The incumbent pattern is a single model emitting a confident binary that is wrong often enough, and in biased enough ways, that its own customers are turning it off.
 
-Bedrock treats detection as **evidence aggregation under uncertainty**. For a given input it gathers every signal it can:
+Bonafide treats detection as **evidence aggregation under uncertainty**. For a given input it gathers every signal it can:
 
 - **Hard provenance** — a cryptographically-valid C2PA / Content Credentials manifest (now shipping in the Samsung Galaxy S25 camera, all of Adobe, OpenAI, and Google surfaces). Near-conclusive *when present*.
 - **Watermarks** — SynthID and friends. High-trust for participating generators.
 - **An ensemble of ML detectors** — zero-shot and supervised, our own and (opt-in) third-party.
 - **Forensic & stylometric features** — perplexity curvature, frequency artifacts, metadata.
 
-It then **fuses** these signals — which live on wildly different trust levels — into **one calibrated posterior probability with a confidence interval**, runs it through a **conformal-prediction gate**, and — crucially — **abstains** when the evidence doesn't support a confident call. The output is an **evidence report** you can read and audit, not a black-box number. When a valid C2PA signature says "camera-captured" but pixel forensics scream "generated," Bedrock surfaces *both* and flags the conflict rather than hiding it.
+It then **fuses** these signals — which live on wildly different trust levels — into **one calibrated posterior probability with a confidence interval**, runs it through a **conformal-prediction gate**, and — crucially — **abstains** when the evidence doesn't support a confident call. The output is an **evidence report** you can read and audit, not a black-box number. When a valid C2PA signature says "camera-captured" but pixel forensics scream "generated," Bonafide surfaces *both* and flags the conflict rather than hiding it.
 
-You should be able to picture it: `bedrock detect photo.jpg` → a card that says *"87% AI-generated (CI 81–91%), decision: AI"* with rows underneath — *C2PA: no manifest (n/a) · SynthID: watermark detected (+strong) · image-forensics: diffusion artifacts in 3 regions (+moderate)* — and, on a 40-word ambiguous paragraph, the honest answer: *"Insufficient evidence — abstain."*
+You should be able to picture it: `bonafide detect photo.jpg` → a card that says *"87% AI-generated (CI 81–91%), decision: AI"* with rows underneath — *C2PA: no manifest (n/a) · SynthID: watermark detected (+strong) · image-forensics: diffusion artifacts in 3 regions (+moderate)* — and, on a 40-word ambiguous paragraph, the honest answer: *"Insufficient evidence — abstain."*
 
 **Engineering pillars — the 1–3 things that make or break this:**
 
-1. **The Evidence Fusion & Calibration Engine (§4).** Combining a cryptographic signature and a noisy perplexity score into one *calibrated, honest* number — with principled abstention — is the intellectual core and the moat. Get this wrong and Bedrock is just another aggregator; get it right and it's the only detector you can actually trust.
+1. **The Evidence Fusion & Calibration Engine (§4).** Combining a cryptographic signature and a noisy perplexity score into one *calibrated, honest* number — with principled abstention — is the intellectual core and the moat. Get this wrong and Bonafide is just another aggregator; get it right and it's the only detector you can actually trust.
 2. **A modality-agnostic detector plugin architecture (§5, §6.1).** Ports-and-adapters so *any* detector for *any* medium plugs into the same pipeline. This is what makes "supports every kind of media eventually" true instead of aspirational — text and images in v1, audio and video as drop-in adapters later with **zero core changes**.
 3. **Adversarial robustness & honesty (§6.6, §9).** Detectors lose ~50% accuracy in the wild and under attack. The system must *know when it's out of its depth* — via OOD guards, conflict detection, and conformal coverage — and say so, rather than emit confident garbage.
 
 ## 2. Goals / Non-goals
 
 **Goals (v1 — testable):**
-- One call — `bedrock.detect(input)` (SDK) and `POST /detect` (HTTP) — returns a `Verdict`: calibrated `p_ai` with a confidence interval, a `decision ∈ {ai, human, abstain}`, and an `evidence[]` list itemizing every signal's contribution.
+- One call — `bonafide.detect(input)` (SDK) and `POST /detect` (HTTP) — returns a `Verdict`: calibrated `p_ai` with a confidence interval, a `decision ∈ {ai, human, abstain}`, and an `evidence[]` list itemizing every signal's contribution.
 - Fuse **≥3 signal types for images** (C2PA provenance, watermark check, ≥1 ML image detector) and **≥3 for text** (Binoculars, Fast-DetectGPT, SynthID-Text, plus stylometric features).
 - **Calibrated, not just accurate:** on a held-out benchmark, reported confidence matches empirical outcome — **Expected Calibration Error (ECE) < 0.05** — and the human-text false-positive rate is *controllable to a configured operating point* (e.g. ≤1%), with borderline cases routed to `abstain` under a conformal coverage guarantee.
 - **Reproducible & auditable:** the same input + same model versions yields the same verdict, byte-for-byte; every verdict is versioned and stored with the exact signal/calibrator versions that produced it.
@@ -53,10 +53,10 @@ You should be able to picture it: `bedrock detect photo.jpg` → a card that say
 - **Not** training our own SOTA foundation detectors from scratch. We orchestrate + calibrate *first*; proprietary models come once we have a labeled corpus and the eval harness to justify them (post-v1). The moat starts as the fusion layer, not the models.
 - **Not** implementing audio or video in v1 — **but** the schema, plugin interface, and job queue are designed so both drop in later with no redesign (see M-later). This is a hard architectural requirement, per the product decision.
 - **Not** a *marking / watermarking* product (helping creators stamp content as human/AI). Detection & verification only. (Marking is the natural adjacent product for EU AI Act *provider-side* compliance — a later company bet, not v1.)
-- **Not** a "humanizer" / evasion tool, and **no** promise of adversarial-proof detection. Bedrock promises *honesty about uncertainty*, not invincibility.
+- **Not** a "humanizer" / evasion tool, and **no** promise of adversarial-proof detection. Bonafide promises *honesty about uncertainty*, not invincibility.
 - **Not** a polished consumer SaaS in v1. v1 is the **engine + SDK + a thin API and demo console**; the full hosted product (your "option 1") is the M5+ evolution.
 - **Not** a plagiarism/similarity checker, identity/KYC, or content-moderation platform. Adjacent, not us.
-- **No** per-person accusations, disciplinary automation, or "verdict: cheater." Bedrock outputs evidence; a human decides. Enforced by the type system, not just docs.
+- **No** per-person accusations, disciplinary automation, or "verdict: cheater." Bonafide outputs evidence; a human decides. Enforced by the type system, not just docs.
 - **Not** real-time / streaming detection. Request-response and batch first (live-stream C2PA is a future signal).
 
 ## 3. Tech stack
@@ -75,7 +75,7 @@ You should be able to picture it: `bedrock detect photo.jpg` → a card that say
 | Async media jobs | **Redis + Arq** | Image/video inference is slow and GPU-bound; a queue keeps `/detect` responsive and is the seam video needs later. |
 | Storage | **Postgres 16** (verdict ledger + audit) + **S3-compatible object store** (media blobs) | Durable, queryable, auditable verdict history; blobs out of the DB. |
 | Explanation | **Claude — `claude-sonnet-5` (cheap path `claude-haiku-4-5-20251001`)** | Renders the structured evidence into a plain-English report. **A narrator, never a detector** — it never sees a vote in the verdict. |
-| SDK & CLI | **`bedrock` Python package** + a thin HTTP client mirroring it; **Typer** CLI | Engine-first, per the product decision: developers integrate the library; the CLI is the first "UI." |
+| SDK & CLI | **`bonafide` Python package** + a thin HTTP client mirroring it; **Typer** CLI | Engine-first, per the product decision: developers integrate the library; the CLI is the first "UI." |
 | Console (M5+) | **Next.js + TypeScript** | The hosted-product evolution ("option 1"). |
 | Tooling | **`uv` + Docker** (GPU containers for model workers) | Fast, reproducible envs; model inference isolated in GPU containers. |
 
@@ -133,7 +133,7 @@ class Verdict:
     evidence: list[Evidence]          # EVERY signal, incl. non-applicable — full transparency
     conflicts: list[str]              # human-readable notes where signals disagreed
     modality: Modality
-    engine_version: str               # bedrock + fused-model version — reproducible & auditable
+    engine_version: str               # bonafide + fused-model version — reproducible & auditable
 ```
 
 **Fusion function** (pure, deterministic given its inputs):
@@ -171,7 +171,7 @@ def fuse(evidence: list[Evidence], *, prior_ai: float,
 
 ```
                           ┌──────────────────────────────────────────────┐
-  input bytes  ─────────▶ │                 BEDROCK CORE                   │
+  input bytes  ─────────▶ │                 BONAFIDE CORE                   │
   (+ optional context)    │  ┌───────────┐    ┌──────────────────────┐    │
                           │  │ Ingest &  │    │   Signal Registry     │    │
                           │  │ Modality  │──▶ │   (signals per        │    │
@@ -229,7 +229,7 @@ Validates the manifest, checks the signature against the bundled CAI + C2PA-conf
 - Manifest valid but carrying **no** origin markers → `llr = 0`. A signed manifest is not evidence of human origin; AI-origin assertions can simply be omitted.
 
 ### 6.3 Watermark adapter — SynthID-Text
-Weighted-Mean detector (no training) + Bayesian detector (trained) over supported models → CONCLUSIVE-tier `+llr` when a watermark is found; `applicable=False` when the text is too short or the model family isn't covered. Image/audio/video SynthID detection is currently gated to Google's portal, so for those modalities Bedrock emits a **CONTEXT** signal ("SynthID check recommended — verify at Google's SynthID Detector") until a programmatic API exists. Tracked in §9.
+Weighted-Mean detector (no training) + Bayesian detector (trained) over supported models → CONCLUSIVE-tier `+llr` when a watermark is found; `applicable=False` when the text is too short or the model family isn't covered. Image/audio/video SynthID detection is currently gated to Google's portal, so for those modalities Bonafide emits a **CONTEXT** signal ("SynthID check recommended — verify at Google's SynthID Detector") until a programmatic API exists. Tracked in §9.
 
 ### 6.4 Text detector ensemble
 Binoculars (cross-perplexity between two observer LLMs) + Fast-DetectGPT (conditional-probability curvature) share one loaded scoring LLM. Each converts its score to an `llr` via a fitted logistic link; features (perplexity, cross-perplexity, curvature) also feed the meta-stacker. WEAK/STRONG tier. Paraphrase/adversarial edits raise the OOD flag (§6.6) → reliability drops.
@@ -238,7 +238,7 @@ Binoculars (cross-perplexity between two observer LLMs) + Fast-DetectGPT (condit
 Open forensic model(s) (frequency-domain + diffusion-artifact detectors) as STRONG-tier signals, plus opt-in Reality Defender / Hive adapters. Returns `llr` + a region heat-map in `detail` for the evidence report.
 
 ### 6.6 Modality router & OOD guard
-Sniffs the type (magic bytes / MIME), routes to that modality's registered signals, and runs an **out-of-distribution guard** that sets `reliability → 0` when an input is outside a signal's competence (text under N tokens, unsupported image codec, heavy re-encoding). The guard is why Bedrock degrades to *abstain* instead of to *confidently wrong* — the single biggest lesson from the ~50% real-world accuracy drop the incumbents hide.
+Sniffs the type (magic bytes / MIME), routes to that modality's registered signals, and runs an **out-of-distribution guard** that sets `reliability → 0` when an input is outside a signal's competence (text under N tokens, unsupported image codec, heavy re-encoding). The guard is why Bonafide degrades to *abstain* instead of to *confidently wrong* — the single biggest lesson from the ~50% real-world accuracy drop the incumbents hide.
 
 ### 6.7 Fusion engine
 Implements §4 exactly. Pure, deterministic, unit-tested against hand-computed log-odds. Owns conflict detection and the conformal gate.
@@ -256,7 +256,7 @@ Every verdict persists to Postgres with the input hash, the full `evidence[]`, a
 ### 6.10 API / SDK surface
 ```python
 # SDK
-from bedrock import detect
+from bonafide import detect
 v = detect("essay.txt", prior_ai=0.5, alpha=0.05)   # -> Verdict
 print(v.decision, v.p_ai, v.ci)
 for e in v.evidence: print(e.signal_id, e.llr, e.reliability)
@@ -270,7 +270,7 @@ GET  /healthz
 ```
 ```bash
 # CLI
-bedrock detect photo.jpg --explain      # verdict + Claude-rendered evidence report
+bonafide detect photo.jpg --explain      # verdict + Claude-rendered evidence report
 ```
 
 ## 7. Interface & UX
@@ -282,11 +282,11 @@ v1 is engine-first, so the primary "interface" is the **SDK + CLI + API** above.
 Top-down and independently runnable — each one you can open and test.
 
 - **M0 — Skeleton & it runs.** `detect()` flows bytes → router → a single stub `Signal` → `fuse()` → `Verdict`, exposed via the Typer CLI and a FastAPI `/detect`. Proves the whole spine end-to-end. Verdict is honest-but-dumb (one signal, usually abstains).
-- **M1 — Provenance-first images.** Real C2PA adapter (`c2pa-python`): validate manifest + trust list, map to CONCLUSIVE evidence; image ingest. Bedrock now gives a *correct, high-trust* verdict for any Content-Credentials image and abstains otherwise. Proves the fusion core with a real conclusive signal — a low-risk, high-credibility first capability given C2PA's ubiquity.
+- **M1 — Provenance-first images.** Real C2PA adapter (`c2pa-python`): validate manifest + trust list, map to CONCLUSIVE evidence; image ingest. Bonafide now gives a *correct, high-trust* verdict for any Content-Credentials image and abstains otherwise. Proves the fusion core with a real conclusive signal — a low-risk, high-credibility first capability given C2PA's ubiquity.
 - **M2 — Text ensemble + calibration (the thesis).** Binoculars + Fast-DetectGPT + SynthID-Text over a scoring LLM; fit the isotonic calibrator + conformal gate on RAID; the eval harness reports ECE / FPR / coverage. Delivers calibrated, abstaining text verdicts — the actual differentiator — with the discipline to prove it.
 - **M3 — Image ML ensemble + multi-signal fusion.** Add open image-forensics detector(s) so images fuse *provenance + watermark + ML*, and turn on conflict surfacing (C2PA vs. pixels). Proves cross-tier fusion — the full showcase.
 - **M4 — Explanation, ledger & hardening.** Claude-rendered evidence reports; Postgres verdict ledger + reproducibility; OOD guards tuned; Redis/Arq async queue for slow media; opt-in Reality Defender adapter. Proves auditability, honesty, and production extensibility.
-- **M5 — Thin hosted API + demo console.** Deploy the FastAPI service and a minimal Next.js console (upload → evidence card). The first *public, visible* Bedrock — the pivot toward the hosted product ("option 1").
+- **M5 — Thin hosted API + demo console.** Deploy the FastAPI service and a minimal Next.js console (upload → evidence card). The first *public, visible* Bonafide — the pivot toward the hosted product ("option 1").
 - **M-later (planned, not v1) — Audio & Video.** **Audio:** voice-clone + AI-music (Suno/Udio) adapters using MERT features and an acoustic-signature ensemble — reuses fusion/calibration unchanged. **Video:** frame-sampling that reuses the image pipeline + the audio-track pipeline + a temporal-consistency signal, orchestrated over the Arq queue; C2PA 2.3 live-stream support. The plugin architecture + queue mean these are *new adapters*, not a rewrite — this is the whole point of §5.
 
 ## 9. Risks / open questions
@@ -318,7 +318,7 @@ Top-down and independently runnable — each one you can open and test.
 - Text: Pangram (SOTA FPR ~0.01%), GPTZero, Originality.ai, Turnitin (being *disabled* by universities), OpenAI classifier (*retired*).
 - Media: Reality Defender (broadest, free 50/mo dev tier), Sensity, Hive (enterprise-only), Pindrop (audio), Intel FakeCatcher.
 - Audio/music: ACRCloud, authio (12-model meta-classifier), letssubmit bAbI v2 (MERT+LogReg).
-- **Aggregator prior art / the gap:** Eden AI proxies multiple detectors but only *compares* scores — nobody does calibrated multi-signal *fusion* with provenance + abstention. **That gap is Bedrock.**
+- **Aggregator prior art / the gap:** Eden AI proxies multiple detectors but only *compares* scores — nobody does calibrated multi-signal *fusion* with provenance + abstention. **That gap is Bonafide.**
 
 **Models (for the Claude explanation layer)**
 - `claude-sonnet-5` (reports) · `claude-haiku-4-5-20251001` (cheap path). Narrator only — never a detector.

@@ -1,12 +1,12 @@
 """The conformal guarantee, checked empirically: over many independent calibration/test draws,
-per-class coverage must meet the target 1 - alpha. This is the property that lets Bedrock claim
+per-class coverage must meet the target 1 - alpha. This is the property that lets Bonafide claim
 honest abstention rather than hand-waving."""
 
 from __future__ import annotations
 
 import random
 
-from bedrock.training import fit_conformal_gate
+from bonafide.training import fit_conformal_gate
 
 
 def _draw(rng: random.Random, n: int, mu: float, sigma: float) -> tuple[list[float], list[int]]:

@@ -5,8 +5,8 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from bedrock.service import app as service_app
-from bedrock.service.app import app
+from bonafide.service import app as service_app
+from bonafide.service.app import app
 
 client = TestClient(app)
 

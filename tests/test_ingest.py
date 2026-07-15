@@ -3,8 +3,8 @@ HEIC/AVIF *and* MP4. Misroute an image and its provenance signal silently never 
 
 from __future__ import annotations
 
-from bedrock.ingest import context_from_bytes, sniff_mime, sniff_modality
-from bedrock.types import Modality
+from bonafide.ingest import context_from_bytes, sniff_mime, sniff_modality
+from bonafide.types import Modality
 
 WEBP = b"RIFF\x00\x00\x00\x00WEBP" + b"\x00" * 16
 WAV = b"RIFF\x00\x00\x00\x00WAVE" + b"\x00" * 16

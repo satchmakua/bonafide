@@ -3,8 +3,8 @@ signer and generator), so it must neither be forgeable nor crash the console."""
 
 from __future__ import annotations
 
-from bedrock import format_verdict
-from bedrock.types import Evidence, Modality, SignalTier, Verdict
+from bonafide import format_verdict
+from bonafide.types import Evidence, Modality, SignalTier, Verdict
 
 
 def _verdict(detail: dict[str, object], conflicts: tuple[str, ...] = ()) -> Verdict:

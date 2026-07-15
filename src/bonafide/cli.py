@@ -1,4 +1,4 @@
-"""``bedrock`` command-line interface — the first way to drive the engine by hand."""
+"""``bonafide`` command-line interface — the first way to drive the engine by hand."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from .report import format_verdict
 
 app = typer.Typer(
     add_completion=False,
-    help="Bedrock - calibrated, provenance-first AI-content detection.",
+    help="Bonafide - calibrated, provenance-first AI-content detection.",
 )
 
 

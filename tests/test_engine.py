@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from bedrock import detect_bytes, detect_text
-from bedrock.types import Modality
+from bonafide import detect_bytes, detect_text
+from bonafide.types import Modality
 
 # 24 tokens — comfortably over the lexical signal's 20-token applicability floor.
 LONG_TEXT = (
@@ -36,5 +36,5 @@ def test_image_bytes_route_to_image_with_no_applicable_text_signals() -> None:
 
 def test_verdict_carries_a_reproducible_engine_version() -> None:
     v = detect_text(LONG_TEXT)
-    assert v.engine_version.startswith("bedrock/")
+    assert v.engine_version.startswith("bonafide/")
     assert "fuse-logodds-v0" in v.engine_version

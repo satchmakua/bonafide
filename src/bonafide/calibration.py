@@ -337,7 +337,7 @@ class CalibrationArtifact:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "bedrock_version": __version__,
+            "bonafide_version": __version__,
             "calibrator": self.calibrator.to_dict(),
             "gate": self.gate.to_dict(),
             "meta": self.meta,

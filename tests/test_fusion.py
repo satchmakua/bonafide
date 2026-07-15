@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import math
 
-from bedrock.calibration import DeadbandGate, sigmoid
-from bedrock.fusion import fuse
-from bedrock.types import Evidence, Modality, SignalTier
+from bonafide.calibration import DeadbandGate, sigmoid
+from bonafide.fusion import fuse
+from bonafide.types import Evidence, Modality, SignalTier
 
 OPEN_GATE = DeadbandGate(deadband=0.0)  # never abstains, so we can assert on the raw sign
 

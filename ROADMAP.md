@@ -1,4 +1,4 @@
-# ROADMAP — Bedrock
+# ROADMAP — Bonafide
 
 The milestone checklist.
 
@@ -19,8 +19,8 @@ The milestone checklist.
   service, with a placeholder text signal. Tooling (`uv` + hatchling), ruff, mypy(strict), and a
   passing test suite are wired. The fusion core (the moat) is real from day one; only the *signal*
   is a stub, so most inputs honestly `abstain`.
-  **Test:** `uv run pytest` → green; `uv run bedrock detect --text "…"` → prints a verdict + evidence
-  report; `uv run uvicorn bedrock.service.app:app` then open `http://localhost:8000/docs` → `/detect` works.
+  **Test:** `uv run pytest` → green; `uv run bonafide detect --text "…"` → prints a verdict + evidence
+  report; `uv run uvicorn bonafide.service.app:app` then open `http://localhost:8000/docs` → `/detect` works.
 
 ## Phase 1 — Real signals, one tier at a time
 
@@ -31,7 +31,7 @@ The milestone checklist.
   AI claims are discounted, untrusted capture claims count zero, and a spoofed claim can't launder
   itself through a trust-listed re-export. Absent manifests → `applicable=False`; tampered ones →
   conflict → `abstain`. Image ingest wired (container brands checked, so WebP/HEIC/AVIF route right).
-  **Test:** `bedrock detect firefly.jpg` (a real Adobe Firefly asset) → `100% AI-generated,
+  **Test:** `bonafide detect firefly.jpg` (a real Adobe Firefly asset) → `100% AI-generated,
   decision: AI`, CONCLUSIVE evidence, `signer=Adobe Inc.`; an unsigned image → `abstain` with the
   C2PA signal marked not-applicable; a self-signed "camera" spoof → `abstain` (claim weighed zero).
 
@@ -39,10 +39,10 @@ The milestone checklist.
   M0 placeholders with real, fitted calibration (`PlattCalibrator`, `IsotonicCalibrator` via PAVA)
   and a **split-conformal** abstention gate with a class-conditional coverage guarantee — all pure
   stdlib, so the calibration core stays zero-dependency. Added the **evaluation harness** (ECE,
-  Brier, AUROC, FPR with a subgroup slice, empirical coverage) and `bedrock fit` / `bedrock eval`
+  Brier, AUROC, FPR with a subgroup slice, empirical coverage) and `bonafide fit` / `bonafide eval`
   CLI commands. Calibration ships as a versioned, fingerprinted `CalibrationArtifact` threaded
   through detection; the default stays honestly uncalibrated until an artifact is fit on real data.
-  **Test:** `bedrock fit corpus.jsonl -o cal.json` then `bedrock eval corpus.jsonl -c cal.json` →
+  **Test:** `bonafide fit corpus.jsonl -o cal.json` then `bonafide eval corpus.jsonl -c cal.json` →
   reports ECE / FPR / coverage; on synthetic scores, isotonic cuts ECE 0.069 → 0.008 and empirical
   conformal coverage tracks the 1-α target (both pinned by tests).
 
@@ -50,8 +50,8 @@ The milestone checklist.
   Apache-2.0 scoring LLM behind the `[text]` extra) and the SynthID-Text watermark adapter; fit the
   M2a calibrator + conformal gate on the RAID benchmark (incl. a non-native-English slice) and ship
   the trained artifact as the default. Retire the `lexical.py` placeholder.
-  **Test:** `bedrock detect essay.txt` → a calibrated `p_ai` with a CI and honest `abstain` on
-  borderline text; `bedrock eval raid.jsonl -c shipped.json` prints ECE < 0.05 and the target FPR.
+  **Test:** `bonafide detect essay.txt` → a calibrated `p_ai` with a CI and honest `abstain` on
+  borderline text; `bonafide eval raid.jsonl -c shipped.json` prints ECE < 0.05 and the target FPR.
 
 - [ ] **M3 — Image ML ensemble + multi-signal fusion.** Add open image-forensics detector(s) so an
   image fuses provenance + watermark + ML; turn on conflict surfacing (C2PA "camera" vs. pixel tells).
@@ -67,7 +67,7 @@ The milestone checklist.
   a plain-English report; a large input is processed via the queue without blocking the API.
 
 - [ ] **M5 — Thin hosted API + demo console.** Deploy the FastAPI service and a minimal Next.js
-  console (upload → evidence card with the abstain state). The first public, visible Bedrock — the
+  console (upload → evidence card with the abstain state). The first public, visible Bonafide — the
   pivot toward the hosted product.
   **Test:** open the deployed console, upload an image/paste text, see the calibrated evidence card.
 
@@ -76,7 +76,7 @@ The milestone checklist.
 - [ ] **M-later — Audio & Video.** Audio: voice-clone + AI-music (Suno/Udio) adapters (MERT features,
   acoustic-signature ensemble). Video: frame-sampling reusing the image pipeline + audio track +
   temporal-consistency signal, over the async queue. Both are *new adapters* — no fusion-core change.
-  **Test:** `bedrock detect clip.mp3` / `clip.mp4` returns a calibrated verdict through the same core.
+  **Test:** `bonafide detect clip.mp3` / `clip.mp4` returns a calibrated verdict through the same core.
 
 ---
 

@@ -1,8 +1,8 @@
-"""Bedrock — a calibrated, provenance-first framework for detecting AI-generated media.
+"""Bonafide — a calibrated, provenance-first framework for detecting AI-generated media.
 
 Public API:
 
-    >>> from bedrock import detect
+    >>> from bonafide import detect
     >>> v = detect("some text or a file path")
     >>> v.decision, v.p_ai
 """

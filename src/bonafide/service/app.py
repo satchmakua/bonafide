@@ -1,6 +1,6 @@
 """FastAPI service exposing the engine over HTTP.
 
-Run: ``uv run uvicorn bedrock.service.app:app --reload``. Interactive docs at ``/docs``.
+Run: ``uv run uvicorn bonafide.service.app:app --reload``. Interactive docs at ``/docs``.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from ..engine import default_registry, detect_bytes, detect_text, engine_version
 from ..types import Verdict
 
 app = FastAPI(
-    title="Bedrock",
+    title="Bonafide",
     version=__version__,
     description="Calibrated, provenance-first detection of AI-generated media.",
 )

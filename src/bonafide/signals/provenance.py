@@ -121,7 +121,7 @@ def _normalize_generator(name: str) -> str:
 
 
 def _bundled(name: str) -> str:
-    return resources.files("bedrock.signals").joinpath(f"data/trust/{name}").read_text(
+    return resources.files("bonafide.signals").joinpath(f"data/trust/{name}").read_text(
         encoding="utf-8"
     )
 

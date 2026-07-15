@@ -6,8 +6,8 @@ import math
 
 import pytest
 
-from bedrock.calibration import CalibrationArtifact
-from bedrock.training import fit_artifact, fit_isotonic, fit_platt
+from bonafide.calibration import CalibrationArtifact
+from bonafide.training import fit_artifact, fit_isotonic, fit_platt
 
 
 def _separable(n: int = 40) -> tuple[list[float], list[int]]:
@@ -49,7 +49,7 @@ def test_platt_stays_finite_on_perfectly_separable_data() -> None:
 
 
 def test_artifact_without_a_recorded_prior_reports_none() -> None:
-    from bedrock.calibration import default_artifact
+    from bonafide.calibration import default_artifact
 
     assert default_artifact().fit_prior is None
     assert CalibrationArtifact.from_dict(fit_artifact(*_separable()).to_dict()).fit_prior == 0.5

@@ -13,10 +13,10 @@ pytest.importorskip("c2pa", reason="provenance extra not installed")
 
 from c2pa import Builder
 
-from bedrock import default_registry, detect_file
-from bedrock.fusion import fuse
-from bedrock.signals.provenance import C2paSignal, classify_store, reliability_for
-from bedrock.types import Evidence, Modality, SignalTier
+from bonafide import default_registry, detect_file
+from bonafide.fusion import fuse
+from bonafide.signals.provenance import C2paSignal, classify_store, reliability_for
+from bonafide.types import Evidence, Modality, SignalTier
 from conftest import (
     actions_manifest,
     ca_anchor_pem,
@@ -31,7 +31,7 @@ CAPTURE_DST = "http://cv.iptc.org/newscodes/digitalsourcetype/digitalCapture"
 
 
 def analyze_file(path: Path, signal: C2paSignal) -> Evidence:
-    from bedrock.ingest import context_from_path
+    from bonafide.ingest import context_from_path
 
     return signal.analyze(context_from_path(path))
 
@@ -228,10 +228,10 @@ def test_end_to_end_ingredient_laundering_attack_is_blocked(tmp_path: Path) -> N
 
     An attacker self-signs an AI image as 'digitalCapture' with an off-list cert, then
     re-exports it through a trust-listed editor. The spoofed manifest survives as an ingredient
-    and the store validates as *Trusted* on the editor's cert. Bedrock must still refuse to
+    and the store validates as *Trusted* on the editor's cert. Bonafide must still refuse to
     treat the ingredient's camera claim as vouched-for evidence.
     """
-    from bedrock.ingest import context_from_path
+    from bonafide.ingest import context_from_path
 
     evil, editor = make_cert_chain("Evil Corp"), make_cert_chain("Trusted Editor")
 

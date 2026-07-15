@@ -5,9 +5,9 @@ from __future__ import annotations
 import math
 from pathlib import Path
 
-from bedrock import CalibrationArtifact, detect_text
-from bedrock.calibration import PlattCalibrator, SplitConformalGate
-from bedrock.eval import (
+from bonafide import CalibrationArtifact, detect_text
+from bonafide.calibration import PlattCalibrator, SplitConformalGate
+from bonafide.eval import (
     Scored,
     auroc,
     brier,
@@ -18,7 +18,7 @@ from bedrock.eval import (
     run_eval,
     score_corpus,
 )
-from bedrock.training import fit_artifact
+from bonafide.training import fit_artifact
 
 
 def test_ece_hand_value() -> None:
@@ -111,8 +111,8 @@ def test_bom_prefixed_corpus_loads(tmp_path: Path) -> None:
 def test_fitted_prior_is_locked_at_inference() -> None:
     # A calibrator fit at prior 0.5 must not be silently re-scaled by a caller's --prior; the
     # artifact's recorded prior wins, so the verdict stays on the calibrated scale.
-    from bedrock.calibration import PlattCalibrator
-    from bedrock.training import fit_conformal_gate
+    from bonafide.calibration import PlattCalibrator
+    from bonafide.training import fit_conformal_gate
 
     xs = [float(i - 20) for i in range(40)]
     ys = [1 if x > 0 else 0 for x in xs]

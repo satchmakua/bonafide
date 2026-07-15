@@ -7,7 +7,7 @@ import math
 import random
 from itertools import pairwise
 
-from bedrock.calibration import (
+from bonafide.calibration import (
     CalibrationArtifact,
     DeadbandGate,
     IdentityCalibrator,
@@ -20,8 +20,8 @@ from bedrock.calibration import (
     logit,
     sigmoid,
 )
-from bedrock.eval import ece
-from bedrock.training import conformal_quantile, fit_isotonic, fit_platt
+from bonafide.eval import ece
+from bonafide.training import conformal_quantile, fit_isotonic, fit_platt
 
 
 def test_sigmoid_logit_round_trip() -> None:

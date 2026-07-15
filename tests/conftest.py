@@ -85,8 +85,8 @@ def actions_manifest(
     if digital_source_type is not None:
         act["digitalSourceType"] = digital_source_type
     return {
-        "claim_generator_info": [{"name": "bedrock-tests", "version": "0"}],
-        "title": "bedrock test asset",
+        "claim_generator_info": [{"name": "bonafide-tests", "version": "0"}],
+        "title": "bonafide test asset",
         "assertions": [{"label": "c2pa.actions", "data": {"actions": [act]}}],
     }
 

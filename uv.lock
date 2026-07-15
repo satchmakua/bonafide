@@ -99,7 +99,7 @@ wheels = [
 ]
 
 [[package]]
-name = "bedrock"
+name = "bonafide"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
