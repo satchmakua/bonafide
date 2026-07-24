@@ -1,7 +1,5 @@
 # Bonafide
 
-*(formerly Bedrock)*
-
 **A calibrated, provenance-first framework for detecting AI-generated media — honest about what it knows, and about what it doesn't.**
 
 In an age of deepfakes and synthetic everything, the question "was this made by a human or by AI?" matters more each day. The existing detectors answer it with confident binaries that are wrong often enough — and in biased enough ways — that their own customers are turning them off.
