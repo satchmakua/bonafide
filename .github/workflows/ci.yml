@@ -12,10 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      # uv's --system installs into whatever Python is on PATH, so give it a real (non-uv-managed)
+      # CPython. A uv-managed interpreter is marked "externally managed" and --system refuses to
+      # touch it (error: "externally managed ... Virtual environments were not considered due to
+      # the --system flag") -- which is exactly what turned every run red before this.
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Install
         run: uv pip install --system -e ".[dev,provenance]"

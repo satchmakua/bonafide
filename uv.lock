@@ -157,8 +157,8 @@ text = [
 requires-dist = [
     { name = "anthropic", marker = "extra == 'all'", specifier = ">=0.40" },
     { name = "anthropic", marker = "extra == 'explain'", specifier = ">=0.40" },
-    { name = "c2pa-python", marker = "extra == 'all'", specifier = ">=0.36" },
-    { name = "c2pa-python", marker = "extra == 'provenance'", specifier = ">=0.36" },
+    { name = "c2pa-python", marker = "extra == 'all'", specifier = ">=0.36,<0.37" },
+    { name = "c2pa-python", marker = "extra == 'provenance'", specifier = ">=0.36,<0.37" },
     { name = "cryptography", marker = "extra == 'dev'", specifier = ">=43" },
     { name = "fastapi", specifier = ">=0.115,<1" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },

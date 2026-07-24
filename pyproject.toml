@@ -25,7 +25,10 @@ dependencies = [
 
 [project.optional-dependencies]
 # M1 — C2PA / Content Credentials provenance verification (Rust-backed reference impl).
-provenance = ["c2pa-python>=0.36"]
+# Pinned <0.37: 0.37 changed ingredient-manifest validation (a trusted store carrying an
+# untrusted ingredient now reads "Invalid"), which breaks the laundering-defense test. M1 was
+# built + verified against 0.36; re-verify the security tests before lifting this bound.
+provenance = ["c2pa-python>=0.36,<0.37"]
 # M2 — calibration + conformal abstention.
 calibrate = ["numpy>=2.1", "scikit-learn>=1.5", "mapie>=0.9"]
 # M2 — zero-shot text detector ensemble + SynthID-Text (needs transformers>=4.46).
